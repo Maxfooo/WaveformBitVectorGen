@@ -6,9 +6,6 @@ Created on Jan 26, 2016
 
 import math as m
 from FileIO import *
-busName = 'DAC_Sinusoid'
-fileBufferSize = 512 # 512 lines of bit vectors is the maximum resolution
-bitResolution = 12 # bits
 
 class GenerateSinusoid(object):
     '''
@@ -63,7 +60,4 @@ class GenerateSinusoid(object):
         waveFile.close()
 
 
-sinu = GenerateSinusoid(busName, fileBufferSize, bitResolution)
-
-sinu.run()
 
