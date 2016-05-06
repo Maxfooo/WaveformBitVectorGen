@@ -6,15 +6,20 @@ Created on Jan 26, 2016
 
 import math as m
 from FileIO import *
+busName = 'DAC_Sinusoid'
+fileBufferSize = 512 # 512 lines of bit vectors is the maximum resolution
+bitResolution = 12 # bits
 
 class GenerateSinusoid(object):
     '''
     b111001100000,1,1,1,0,0,1,1,0,0,0,0,0
     '''
-    def __init__(self, busName, fileBufferSize, bitResolution):
+    def __init__(self, busName, fileBufferSize, bitResolution, upLimit=None, loLimit=None):
         self.busName = busName
         self.fileBufferSize = fileBufferSize
         self.bitResolution = bitResolution
+        self.upLimit = upLimit
+        self.loLimit = loLimit
         self.fileIO = FileIO()
 
     def run(self):
@@ -37,10 +42,25 @@ class GenerateSinusoid(object):
         sizeByte_2 = (2**self.bitResolution)/2
         sinStepSize = (2*m.pi) / self.fileBufferSize
         self.byteValues = []
-        for j in range(self.fileBufferSize):
-            b = format((round((sizeByte_2)+((sizeByte_2)*m.sin(j*sinStepSize))))-1,'0{}b'.format(self.bitResolution))
-            b = 'b'+ b
-            self.byteValues.append(b)
+
+        if (self.upLimit == None and self.loLimit == None):
+            for j in range(self.fileBufferSize):
+                b = format((round(sizeByte_2+((sizeByte_2)*m.sin(j*sinStepSize))))-1,'0{}b'.format(self.bitResolution))
+                b = 'b'+ b
+                self.byteValues.append(b)
+        else:
+            sineUpLimFactor = self.upLimit/2
+            sineLoLimFactor = sizeByte_2 - self.loLimit
+            for j in range(self.fileBufferSize):
+                sineVal = m.sin(j*sinStepSize)
+                if sineVal >= 0:
+                    b = format((round(sizeByte_2+(sineUpLimFactor*sineVal)))-1,'0{}b'.format(self.bitResolution))
+                    b = 'b'+ b
+                    self.byteValues.append(b)
+                else:
+                    b = format((round(sizeByte_2+(sineLoLimFactor*sineVal)))-1,'0{}b'.format(self.bitResolution))
+                    b = 'b'+ b
+                    self.byteValues.append(b)
 
     def genCSVbyte(self, byteString):
         b = byteString.replace('b','')
@@ -58,6 +78,5 @@ class GenerateSinusoid(object):
         for i in self.byteValues:
             waveFile.write(i + self.genCSVbyte(i) + '\n')
         waveFile.close()
-
 
 
