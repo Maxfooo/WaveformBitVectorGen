@@ -18,7 +18,7 @@ EC_BITRESOLUTION_HIGH = 6
 EC_BITRESOLUTION_LOW = 7
 EC_BITRESOLUTION_TYPE = 8
 EC_BAD_LIMIT = 9
-
+EC_BAD_P2P_VAL = 10
 
 class WaveGenUI(Frame):
 
@@ -32,9 +32,9 @@ class WaveGenUI(Frame):
     def initUI(self):
         self.waveformSelect()
         self.paramInput()
+        self.shrinkP2P()
         self.sineLimitInput()
         self.generateButton()
-
 
     def waveformSelect(self):
         self.waveFormFrame = LabelFrame(self, text = 'Waveform Select')
@@ -103,10 +103,25 @@ class WaveGenUI(Frame):
 
         self.ampFrame.pack(fill=BOTH)
 
-        self.upperLimit.set("FFF")
-        self.lowerLimit.set("1A7")
+        self.upperLimit.set("4095")
+        self.lowerLimit.set("0")
 
+    def shrinkP2P(self):
+        self.p2pFrame = LabelFrame(self, text='Shrink peak2peak val')
 
+        self.shrinkP2PVal = StringVar()
+
+        self.shrinkFrame = Frame(self.p2pFrame)
+        p2pLabel = Label(self.shrinkFrame, text = 'Shrink by: ', pady=4, padx=4)
+        p2pLabel.pack(side = LEFT)
+        p2pEntry = Entry(self.shrinkFrame, textvariable=self.shrinkP2PVal, width=12)
+        p2pEntry.pack(side=LEFT)
+        self.shrinkFrame.pack(anchor = W)
+
+        self.p2pFrame.pack(fill=BOTH)
+
+        self.shrinkP2PVal.set('0')
+		
     def generateButton(self):
         self.startGenFrame = LabelFrame(self, text='Generate Waveform')
 
@@ -150,8 +165,8 @@ class WaveGenUI(Frame):
             error.append(EC_BITRESOLUTION_TYPE)
 
         try:
-            _upLim = int(self.upperLimit.get(), 16)
-            _loLim = int(self.lowerLimit.get(), 16)
+            _upLim = int(self.upperLimit.get())
+            _loLim = int(self.lowerLimit.get())
             if _loLim > _upLim:
                 a = _upLim
                 _upLim = _loLim
@@ -166,6 +181,13 @@ class WaveGenUI(Frame):
         except:
             error.append(EC_BAD_LIMIT)
 
+			
+        try:
+            _shrinkP2PVal = int(self.shrinkP2PVal.get())
+            if _shrinkP2PVal == 0:
+                _shrinkP2PVal = None
+        except:
+            error.append(EC_BAD_P2P_VAL)
 
         if len(error) > 0:
             for i,err in enumerate(error):
@@ -187,19 +209,21 @@ class WaveGenUI(Frame):
                     errorMessage += "({}) Bit resolution must be an integer\n".format(i)
                 elif err == EC_BAD_LIMIT:
                     errorMessage += "({}) Problem with limits. Format: FFF\n".format(i)
+                elif err == EC_BAD_P2P_VAL:
+                    errorMessage += "({}) Problem with peak2peak val. Set to 0 if not using\n".format(i)
                 else:
                     errorMessage += "Unknown error encountered\n"
 
             mb.showinfo("Error", errorMessage)
         else:
             if _wvfVar == 1:
-                _gs = gs(_busName, _fbs, _bitRes, _upLim, _loLim)
+                _gs = gs(_busName, _fbs, _bitRes, _upLim, _loLim, _shrinkP2PVal)
                 _gs.run()
 
 
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("200x300")
+    root.geometry("200x400")
     app = WaveGenUI(master=root)
     app.mainloop()
