@@ -51,7 +51,7 @@ class GenerateSinusoid(object):
                     b = 'b'+ b
                     self.byteValues.append(b)
             else:
-                sineP2P = (sizeByte_2 - self.p2pShrink)/2
+                sineP2P = sizeByte_2 - self.p2pShrink/2
                 for j in range(self.fileBufferSize):
                     b = format((round(sizeByte_2+(sineP2P*m.sin(j*sinStepSize)))),'0{}b'.format(self.bitResolution))
                     b = 'b'+ b
