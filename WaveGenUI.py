@@ -15,7 +15,7 @@ class WaveGenUI(Frame):
         Frame.__init__(self, master)
         master.title("Waveform Bit Vector Generator")
         self.pack()
-
+        self.versionNumber = '1.0.0'
         self.initUI()
 
     def initUI(self):
@@ -38,6 +38,9 @@ class WaveGenUI(Frame):
         self.rampButton = Button(self.waveFormFrame, text = 'Ramp', command=self.rampUI)
         self.rampButton.pack(fill=BOTH)
         
+        self.versionButton = Button(self.waveFormFrame, text = 'App Info', command=self.infoDialogbox)
+        self.versionButton.pack(fill = BOTH)
+        
         self.waveFormFrame.pack(fill=BOTH, expand=1)
         
         
@@ -51,11 +54,14 @@ class WaveGenUI(Frame):
         rampTop = Toplevel()
         rampApp = rUI(master = rampTop)
         rampApp.mainloop()
+        
+    def infoDialogbox(self):
+        mb.showinfo("Wavegen Information", "Author: Max A. Ruiz\nVersion: {}".format(self.versionNumber))
 
 
 
 if __name__ == '__main__':
     root = Tk()
-    root.geometry("300x180")
+    root.geometry("300x200")
     app = WaveGenUI(master=root)
     app.mainloop()
